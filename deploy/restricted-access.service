@@ -1,0 +1,34 @@
+[Unit]
+Description=Restricted Access geo gate
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=restricted-access
+Group=restricted-access
+# This is start command.
+ExecStart=/var/lib/restricted-access/bin/restricted-access serve -config /etc/restricted-access/config.yaml
+Restart=on-failure
+RestartSec=5s
+UMask=0027
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true
+RestrictRealtime=true
+SystemCallArchitectures=native
+CapabilityBoundingSet=
+AmbientCapabilities=
+RestrictAddressFamilies=AF_INET AF_INET6
+StateDirectory=restricted-access
+StateDirectoryMode=0750
+ReadWritePaths=/var/lib/restricted-access
+
+[Install]
+WantedBy=multi-user.target

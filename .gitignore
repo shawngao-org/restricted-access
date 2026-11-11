@@ -1,0 +1,9 @@
+/bin/
+/data/
+/config.yaml
+*.mmdb
+*.mmdb.meta.json
+*.mmdb.lock
+.DS_Store
+*_test.go
+.idea

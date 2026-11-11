@@ -1,0 +1,72 @@
+server:
+  # Bind only to the loopback address. If a port is exposed to the public internet, visitors can bypass Nginx.
+  listen: 127.0.0.1:8088
+  allow_public_bind: false
+  # Only connections from these addresses are permitted to specify the visitor's address via the X-Real-IP header.
+  # Nginx must overwrite this header with $remote_addr; it must not forward any value provided by the visitor themselves.
+  trusted_proxies:
+    - 127.0.0.0/8
+    - ::1/128
+  real_ip_header: X-Real-IP
+
+maxmind:
+  # See also: https://dev.maxmind.com/geoip/updating-databases/
+  account_id: "REPLACE_ACCOUNT_ID"
+  license_key: REPLACE_LICENSE_KEY
+  edition_id: GeoLite2-Country
+  download_base: https://download.maxmind.com
+  database_path: data/GeoLite2-Country.mmdb
+  update_enabled: true
+  update_interval: 6h
+  max_stale: 168h
+  # Add this only when MaxMind changes the redirect host. Do not use wildcards.
+  extra_redirect_hosts: []
+
+policy:
+  # ISO 3166-1 alpha-2. Any state, registered nation, or representative state will refuse.
+  deny_countries:
+    - KP
+  # The format is "Country-AdministrativeDivision" (e.g., US-CA). The administrative division codes are derived from a GeoIP database.
+  deny_subdivisions: []
+  always_deny_ips: []
+  # Only the regional database check is skipped; the cookie verification remains in place.
+  # An empty blacklist will be rejected during configuration validation unless `allow_empty_blacklist: true` is explicitly set.
+  always_allow_ips: []
+  allow_empty_blacklist: false
+  unknown_action: deny
+  private_ip_action: deny
+  check_registered_country: true
+  check_represented_country: true
+
+gate:
+  # It must be the target site’s own HTTPS address. The one-time code will be sent exclusively to this address.
+  callback_url: https://app.example.com/_ra/callback
+  # Once verification is successful, the user will be redirected only to this internal path;
+  # addresses specified by the visitor will not be accepted.
+  success_path: /
+  entry_path: /_ra/gate
+  allow_insecure_http: false
+
+token:
+  # openssl rand -base64 32
+  signing_key: REPLACE_WITH_OPENSSL_RAND_BASE64_32
+  code_ttl: 60s
+  clearance_ttl: 30m
+  # The `__Host-` prefix requires the `Secure` flag and `Path=/`, and it must not include a `Domain` attribute;
+  # browsers will reject any attempt to overwrite such a cookie from a subdomain.
+  cookie_name: __Host-ra_clearance
+  code_query: ra_code
+  cookie_secure: true
+  bind_ip: true
+  ipv4_prefix: 32
+  ipv6_prefix: 128
+
+block_page:
+  site_name: ""
+  title: Not accessible in your current region.
+  message: This service is not available in your current region.
+  english: This service is not available in your current region.
+  lang: en-US
+
+log:
+  level: info
