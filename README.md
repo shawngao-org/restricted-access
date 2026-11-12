@@ -4,6 +4,8 @@ Implement geographic access restrictions in front of Nginx: automatically update
 
 > The detection service should listen exclusively on the loopback address. Nginx’s `auth_request` module handles the actual blocking of requests. Do not expose the detection port or the origin server to the public internet.
 
+> ***Note: This project does not implement functionality to detect VPNs/proxies.***
+
 ## How does it work?
 
 1. For a protected location, an internal request is first made to `/_ra/verify`. If no valid access token exists, or if the geographic verification fails, a 401 status code is returned.
